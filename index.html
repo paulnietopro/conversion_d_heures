@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Convertisseur d'Heures Perdir</title>
+  <title>HORA - Conversion d'Heures</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -13,6 +13,7 @@
       --text: #0f172a;
       --muted: #64748b;
       --border: #e2e8f0;
+      --danger: #ef4444;
     }
 
     * {
@@ -25,11 +26,21 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      padding: 12px;
+      padding: 24px 12px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+    }
+
+    .wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: 100%;
+      max-width: 760px;
+      justify-content: center;
+      align-items: stretch;
     }
 
     .container {
@@ -40,6 +51,84 @@
       width: 100%;
       max-width: 360px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      flex: 1 1 320px;
+    }
+
+    .history-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .history-header h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: none;
+      color: var(--danger);
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .btn-clear:hover {
+      background: #fee2e2;
+    }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .history-item .btn-del {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+
+    .history-item .btn-del:hover {
+      color: var(--danger);
+    }
+
+    .empty-msg {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: auto;
+      margin-bottom: auto;
+      font-style: italic;
     }
 
     h2 {
@@ -118,64 +207,120 @@
 </head>
 <body>
 
-<div class="container">
-  <h2>⏱️ Conversion d'Heures</h2>
+<div class="wrapper">
+  <!-- Convertisseur -->
+  <div class="container">
+    <h2>⏱️ HORA - CONVERSION D'HEURES</h2>
 
-  <!-- Mode 1: Sexagésimal vers Décimal -->
-  <div class="section">
-    <div class="section-title">Heures & Minutes ➔ Décimal (ex: Chorus, Paie)</div>
-    <div class="input-group">
-      <input type="number" id="hh" placeholder="h" min="0" oninput="sexaToDec()">
-      <span>h</span>
-      <input type="number" id="mm" placeholder="min" min="0" max="59" oninput="sexaToDec()">
-      <span>m</span>
+    <!-- Mode 1: Sexagésimal vers Décimal -->
+    <div class="section">
+      <div class="section-title">Heures & Minutes ➔ Décimal (ex: Chorus, Paie)</div>
+      <div class="input-group">
+        <input type="number" id="hh" placeholder="h" min="0" onchange="sexaToDec()">
+        <span>h</span>
+        <input type="number" id="mm" placeholder="min" min="0" max="59" onchange="sexaToDec()">
+        <span>m</span>
+      </div>
+      <div class="result">
+        Résultat : <span class="value" id="decResult">0,00 h</span>
+      </div>
     </div>
-    <div class="result">
-      Résultat : <span class="value" id="decResult">0.00 h</span>
+
+    <div class="divider"></div>
+
+    <!-- Mode 2: Décimal vers Sexagésimal -->
+    <div class="section">
+      <div class="section-title">Décimal ➔ Heures & Minutes</div>
+      <div class="input-group">
+        <input type="number" id="decInput" placeholder="ex: 1.75" step="0.01" min="0" onchange="decToSexa()">
+        <span>h</span>
+      </div>
+      <div class="result">
+        Résultat : <span class="value" id="sexaResult">0h 00m</span>
+      </div>
     </div>
+
+    <div class="footer">Calcul instantané & local</div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- Mode 2: Décimal vers Sexagésimal -->
-  <div class="section">
-    <div class="section-title">Décimal ➔ Heures & Minutes</div>
-    <div class="input-group">
-      <input type="number" id="decInput" placeholder="ex: 1.75" step="0.01" min="0" oninput="decToSexa()">
-      <span>h</span>
+  <!-- Panel Historique -->
+  <div class="container history-card">
+    <div class="history-header">
+      <h3>📜 Historique</h3>
+      <button class="btn-clear" onclick="clearHistory()">Tout effacer</button>
     </div>
-    <div class="result">
-      Résultat : <span class="value" id="sexaResult">0h 00m</span>
-    </div>
+    <ul class="history-list" id="historyList"></ul>
+    <div id="emptyMsg" class="empty-msg">Aucun calcul dans l'historique</div>
   </div>
-
-  <div class="footer">Calcul instantané & local</div>
 </div>
 
 <script>
+  function addHistory(text) {
+    const list = document.getElementById('historyList');
+    const emptyMsg = document.getElementById('emptyMsg');
+
+    emptyMsg.style.display = 'none';
+
+    const li = document.createElement('li');
+    li.className = 'history-item';
+    li.innerHTML = `
+      <span>${text}</span>
+      <button class="btn-del" onclick="deleteHistoryItem(this)" title="Supprimer">✕</button>
+    `;
+
+    list.prepend(li);
+  }
+
+  function deleteHistoryItem(btn) {
+    const li = btn.parentElement;
+    li.remove();
+
+    const list = document.getElementById('historyList');
+    if (list.children.length === 0) {
+      document.getElementById('emptyMsg').style.display = 'block';
+    }
+  }
+
+  function clearHistory() {
+    document.getElementById('historyList').innerHTML = '';
+    document.getElementById('emptyMsg').style.display = 'block';
+  }
+
   function sexaToDec() {
-    const h = parseFloat(document.getElementById('hh').value) || 0;
-    const m = parseFloat(document.getElementById('mm').value) || 0;
+    const hInput = document.getElementById('hh').value;
+    const mInput = document.getElementById('mm').value;
+
+    if (hInput === '' && mInput === '') return;
+
+    const h = parseFloat(hInput) || 0;
+    const m = parseFloat(mInput) || 0;
 
     const totalDec = h + (m / 60);
-    
-    // Formatage avec 2 décimales (ex: 1.50)
-    document.getElementById('decResult').innerText = totalDec.toFixed(2).replace('.', ',') + ' h';
+    const formattedResult = totalDec.toFixed(2).replace('.', ',') + ' h';
+
+    document.getElementById('decResult').innerText = formattedResult;
+    addHistory(`${h}h ${m}m ➔ <strong>${formattedResult}</strong>`);
   }
 
   function decToSexa() {
-    const decVal = parseFloat(document.getElementById('decInput').value) || 0;
-    
+    const decValInput = document.getElementById('decInput').value;
+
+    if (decValInput === '') return;
+
+    const decVal = parseFloat(decValInput) || 0;
     const hours = Math.floor(decVal);
     const minutes = Math.round((decVal - hours) * 60);
 
-    // Ajustement si l'arrondi donne 60 minutes
+    let formattedResult = '';
     if (minutes === 60) {
-      document.getElementById('sexaResult').innerText = (hours + 1) + 'h 00m';
+      formattedResult = (hours + 1) + 'h 00m';
     } else {
       const paddedMinutes = minutes < 10 ? '0' + minutes : minutes;
-      document.getElementById('sexaResult').innerText = hours + 'h ' + paddedMinutes + 'm';
+      formattedResult = hours + 'h ' + paddedMinutes + 'm';
     }
+
+    document.getElementById('sexaResult').innerText = formattedResult;
+    addHistory(`${decVal} h ➔ <strong>${formattedResult}</strong>`);
   }
 </script>
 
